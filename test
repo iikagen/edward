@@ -1,0 +1,390 @@
+import pygame
+import time
+import math
+
+pygame.init()
+
+#setting up the game window ----------------------------------------
+display_width  = 800
+display_height = 600
+
+black = (0,0,0)
+white = (255,255,255)
+red = (255,0,0)
+green = (0,25,0)
+
+fwidth = 30
+fheight = 30
+dwidth = 50
+dheight = 50
+alexdidjob = True
+
+gameDisplay = pygame.display.set_mode((display_width,display_height))
+pygame.display.set_caption('fighter combat')
+clock = pygame.time.Clock()
+
+global fighterimg
+
+fighterimg          = pygame.image.load('marauder.png')
+fighterimg1         = pygame.image.load('marauder.png')
+interimg            = pygame.image.load('ufointerceptor.png')
+missleimg           = pygame.image.load('misslesmall.png')
+
+backroundimg        = pygame.image.load('backround.png')
+main_menuimg        = pygame.image.load('mainmenu1.png')
+pause_menuimg       = pygame.image.load('pausemenu1.png')
+
+Startimg            = pygame.image.load('Start_high.png')
+Quitimg             = pygame.image.load('Quit_high.png')
+Resumeimg           = pygame.image.load('Resume_high.png')
+
+#functions for the game
+    
+def paused():
+#when paused display menu with buttons
+    #pause = True
+    while pause:
+        gameDisplay.blit(pause_menuimg,(0,0))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        pause_button(150,450,100,50,resume)  
+        pause_button(550,450,100,50,quitgame)
+        
+        pygame.display.update()
+        clock.tick(15)
+def resume():
+    global pause
+    pause = False
+    
+def quitgame():
+    pygame.quit()
+    quit()
+    
+def pause_button(x,y,w,h,action=None):
+#defining mouse & click + where buttons are
+    mouse= pygame.mouse.get_pos()
+    click= pygame.mouse.get_pressed()
+
+#    print (mouse)
+    if x+w > mouse[0] > x and y+h > mouse[1] > y:
+        if mouse[0] < display_width/2:
+            gameDisplay.blit(Resumeimg,(150,450)) 
+        if mouse[0] > display_width/2:
+            gameDisplay.blit(Quitimg,(550,450)) 
+            pygame.display.update()
+        if click[0] == 1 and action != None:
+            action()
+        
+def main_button(x,y,w,h,action=None):
+    mouse= pygame.mouse.get_pos()
+    click= pygame.mouse.get_pressed()
+
+#    print (mouse)
+    if x+w > mouse[0] > x and y+h > mouse[1] > y:
+        if mouse[0] < display_width/2:
+            gameDisplay.blit(Startimg,(150,450)) 
+        if mouse[0] > display_width/2:
+            gameDisplay.blit(Quitimg,(550,450)) 
+            pygame.display.update()
+        if click[0] == 1 and action != None:
+            action()
+        
+def game_intro():
+    intro= True
+
+    while intro:
+        gameDisplay.blit(main_menuimg,(0,0))
+        for event in pygame.event.get():
+            if event.type==pygame.QUIT:
+                pygame.quit()
+                quit()
+
+        main_button(150,450,100,50,game)  
+        main_button(550,450,100,50,quitgame)
+
+        pygame.display.update()
+        clock.tick(10)
+    
+def crash():
+    #message_display('Crashed!')
+    print('Crashed!')
+def fighter(x,y,fighterimg1):
+    gameDisplay.blit(fighterimg1,(x,y))
+    
+def dreadnaught(x1,y1):
+    gameDisplay.blit(pygame.image.load('ufodreadnaught.png'), (x1,y1))
+    
+def missle(xm,ym,missleimg1):
+    gameDisplay.blit(missleimg1, (xm,ym))
+    
+def newguy(x2,y2,interimg1):
+    gameDisplay.blit(interimg1, (x2[1],y2[1]))
+    gameDisplay.blit(interimg1, (x2[0],y2[0]))
+def controlscheme():
+    global av,dv,wv,sv,pause,qv,ev,fangle,x_change,y_change
+    if alexdidjob == True:
+        #Makes Rocket point to wherever mouse is
+        if pygame.mouse.get_pos()[0]-x > 0:
+            fangle = 180-1*math.atan((pygame.mouse.get_pos()[1]-y)/(pygame.mouse.get_pos()[0]-x+0.0000000000000000000000000001))/math.pi*180.0+90
+        else:
+            fangle = -1*math.atan((pygame.mouse.get_pos()[1]-y)/(pygame.mouse.get_pos()[0]-x+0.0000000000000000000000000001))/math.pi*180.0+90
+            
+    for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                crashed = True
+            if event.type == pygame.KEYDOWN:      
+                if event.key == pygame.K_ESCAPE:
+                    pause = True
+                    paused()
+                if event.key == pygame.K_a:
+                    av = True
+                if event.key == pygame.K_d:
+                    dv = True
+                if event.key == pygame.K_w:
+                    wv = True
+                if event.key == pygame.K_s:
+                    sv = True
+                if event.key == pygame.K_SPACE:
+                    y_change = 0
+                    x_change = 0
+                if event.key == pygame.K_q:
+                    qv = True
+                if event.key == pygame.K_e:
+                    ev = True
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_ESCAPE:
+                    pause = False
+                    resume()
+                if event.key == pygame.K_a:
+                    av = False
+                if event.key == pygame.K_d:
+                    dv = False
+                if event.key == pygame.K_w:
+                    wv = False
+                if event.key == pygame.K_s:
+                    sv = False
+                if event.key == pygame.K_q:
+                    qv = False
+                if event.key == pygame.K_e:
+                    ev = False
+    if av == True:
+        #fighterimg = pygame.image.load('marauderl.png')
+        x_change -= math.sin(((fangle+90)*math.pi)/180) * strafespd
+        y_change -= math.cos(((fangle+90)*math.pi)/180) * strafespd
+    if dv == True:
+        #fighterimg = pygame.image.load('marauderr.png')
+        x_change -= math.sin(((fangle+270)*math.pi)/180) * strafespd
+        y_change -= math.cos(((fangle+270)*math.pi)/180) * strafespd
+    if wv == True:
+        #fighterimg = pygame.image.load('marauderu.png')
+        x_change -= math.sin(fangle*math.pi/180) *  fwrdspd
+        y_change -= math.cos(fangle*math.pi/180) * fwrdspd
+    if sv == True:
+        #fighterimg = pygame.image.load('marauderd.png')
+        x_change -= math.sin((fangle+180)*math.pi/180) * brkspd
+        y_change -= math.cos((fangle+180) * math.pi/180) * brkspd
+    if alexdidjob == False:
+        if qv == True:
+            fangle = fangle + 5
+    if alexdidjob == False:
+        if ev == True:
+            fangle = fangle - 5
+    
+def interai():
+    interspd = 5
+    global x
+    global y
+    global y1
+    global x1
+    if x > x2[0]:
+        x2[0] = x2[0] + interspd + 0.5
+    if x < x2[0]:
+        x2[0] = x2[0] - interspd + 0.5
+    if y > y2[0]:
+        y2[0] = y2[0] + interspd
+    if y < y2[0]:
+        y2[0] = y2[0] - interspd
+    if x > x2[1]:
+        x2[1] = x2[1] + interspd
+    if x < x2[1]:
+        x2[1] = x2[1] - interspd
+    if y > y2[1]:
+        y2[1] = y2[1] + interspd + 0.5
+    if y < y2[1]:
+        y2[1] = y2[1] - interspd + 0.5
+    if y<y2[0]:
+        interangle[0]=180+math.atan((x-x2[0]+0.001)/(y-y2[0]+0.001))/math.pi*180
+    else:
+        interangle[0]=math.atan((x-x2[0]+0.001)/(y-y2[0]+0.001))/math.pi*180
+    if y<y2[1]:
+        interangle[1]=180+math.atan((x-x2[1]+0.001)/(y-y2[1]+0.001))/math.pi*180
+    else:
+        interangle[1]=math.atan((x-x2[1]+0.001)/(y-y2[1]+0.001))/math.pi*180
+def hitbox(xi,yi,xn,yn,widthi,heighti,heightn,widthn):
+    if yi + heighti > yn:
+        if yi < yn + heightn:
+            if xi+widthi > xn:
+                if xi  < xn + widthn:
+                    return True
+                else:
+                    return False
+            else:
+                return False
+        else:
+            return False
+    else:
+        return False
+
+crashed = False
+def game():
+    global fighterimg,x,y,y1,y2,x1,x2,x_change,y_change,xm,ym,xm_change,ym_change,mangle,fangle,mv,av,dv,wv,sv,qv,ev,strafespd,fwrdspd,brkspd,crashed,interangle
+    lase = 0
+    fangle = 0
+    x = (display_width * 0.5)
+    y = (display_height * 0.9)
+    y1 = (display_height * 0.1)
+    x1 = (display_width * 0.45)
+    y2 = [(display_height*0.1),(display_height*0.1)]
+    x2 = [(display_width * 0.45+50),(display_width * 0.1)]
+    x_change = 0
+    y_change = 0
+    xm = [0,0,0,0,0]
+    ym = [0,0,0,0,0]
+    xm_change = [0,0,0,0,0]
+    ym_change = [0,0,0,0,0]
+    mangle = [0,0,0,0,0]
+    mv = [0,0,0,0,0]
+    counter = 0
+    #xm = 0
+    #ym = 0
+    #xm_change = 0
+    #ym_change = 0
+    #mangle = 0
+    #mv = 0
+    av = False
+    dv = False
+    wv = False
+    sv = False
+    qv = False
+    ev = False
+    strafespd = 0.5
+    fwrdspd = 0.75
+    brkspd = 0.375
+    crashed = False
+    interangle = [0,0]
+    
+    while not crashed:
+        gameDisplay.blit(backroundimg, (0, 0))
+        #control sceme
+        fighterimg = pygame.image.load('marauder.png')
+        controlscheme()
+        #interceptor ai
+        interai()
+        #shooting
+        print("shooting?")
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    pause = True
+                    paused()
+                if event.key == pygame.K_x:
+                    print(counter)
+                    for counter in range (0,4):
+                        if mv[counter] == 0:
+                            xm_change[counter] = math.sin(fangle*math.pi/180) *  -10
+                            ym_change[counter] = math.cos(fangle*math.pi/180) * -10
+                            mv[counter] = 1
+                            xm[counter] = x + fwidth/2
+                            ym[counter] = y + fheight/2
+                            mangle[counter] = fangle
+                            break
+
+        
+        if lase > 0:
+            gameDisplay.blit(pygame.image.load('laser.png'), (x + 1 + fwidth/2, y - 85))
+            lase = lase - 1
+        if lase > 60:
+            lase = 0
+        #prevents goin offscreen
+        if x < 0:
+                x = 800 - fwidth
+        if x > 800 - fwidth:
+                x = 0
+        if y < 0:
+                y = 600 - fheight
+        if y > 600 - fheight:
+                y = 0
+        #calculates and uses the distance between dread and the fighter
+        dreaddist = math.fabs(math.sqrt(((x1-x)*(x1-x)) + ((y1-y)*(y1-y))))
+        if x1-100 < 0:
+            x1 = x1 + 1
+        elif y1 - 100 < 0:
+            y1 = y1 + 1
+        elif x1+100 > 600:
+            x1 = x1 - 1
+        elif y1+100 > 800:
+            
+            y1 = y1 - 1
+        elif dreaddist < 70:
+            x1 = x1 + ((x1-x)/16)
+            y1 = y1 + ((y1-y)/16)
+        elif dreaddist < 120:
+            x1 = x1 + ((x1-x)/32)
+            y1 = y1 + ((y1-y)/32)
+        elif dreaddist >120:
+            x1 = x1 - ((x1-x)/2000)
+            y1 = y1 - ((y1-y)/2000)
+        #if xm < 0:
+        #    mv = 0
+        #if xm > 800 - 8:
+        #    mv = 0
+        #if ym < 0:
+        #    mv = 0
+        #if ym > 600 - 36:
+        #    mv = 0        
+        interimg1 = pygame.transform.rotate(interimg,interangle[1])
+        interimg1 = pygame.transform.rotate(interimg,interangle[0])
+        #important logic, dont mess with it
+        if x_change > 10:
+            x_change = 10
+        if y_change > 10:
+            y_change = 10
+        if x_change < -10:
+            x_change = -10
+        if y_change < -10:
+            y_change = -10
+        newguy(x2,y2,interimg1)
+        fighterimg1 = pygame.transform.rotate(fighterimg,fangle)
+        #missleimg1 = pygame.transform.rotate(missleimg,mangle)
+        x += x_change
+        y += y_change
+
+        #loop for missiles
+        for counter in range (0,4):
+            if mv[counter]>0:
+                missleimg1 = pygame.transform.rotate(missleimg,mangle[counter])
+                xm[counter] += xm_change[counter]
+                ym[counter] += ym_change[counter]
+                missle(xm[counter],ym[counter],missleimg1)
+            if xm[counter] < 0 or xm[counter] > display_width-8:
+                mv[counter] = 0
+            if ym[counter] < 0 or ym[counter]> display_height-36:
+                mv[counter] = 0
+
+        
+        #xm += xm_change
+        #ym += ym_change
+        #missle(xm,ym,missleimg1)
+        fighter(x,y,fighterimg1)
+        dreadnaught(x1,y1)
+
+        pygame.display.update()
+        clock.tick(60)
+
+game_intro()
+pygame.quit()
+quit()
+
